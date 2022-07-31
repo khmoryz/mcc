@@ -5,5 +5,5 @@
 ## Exec
 
 ```
-docker run --rm -v $PWD:/mcc -w /mcc compilerbook ls {コマンド}
+docker run --rm -v $PWD:/mcc -w /mcc compilerbook {コマンド}
 ```
