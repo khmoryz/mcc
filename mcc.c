@@ -22,11 +22,28 @@ struct Token
 
 Token *token;
 
+char *user_input;
+
 // Reports an error and exit.
 void error(char *fmt, ...)
 {
   va_list ap;
   va_start(ap, fmt);
+  vfprintf(stderr, fmt, ap);
+  fprintf(stderr, "\n");
+  exit(1);
+}
+
+// Reports an error with location and exit.
+void error_at(char *loc, char *fmt, ...)
+{
+  va_list ap;
+  va_start(ap, fmt);
+
+  int pos = loc - user_input;
+  fprintf(stderr, "%s\n", user_input);
+  fprintf(stderr, "%*s", pos, " ");
+  fprintf(stderr, "^ ");
   vfprintf(stderr, fmt, ap);
   fprintf(stderr, "\n");
   exit(1);
@@ -71,7 +88,7 @@ Token *tokenize(char *p)
       cur->val = strtol(p, &p, 10);
       continue;
     }
-    error("invalid token");
+    error_at(cur->str, "invalid token");
   }
   cur = new_token(TK_EOF, cur, p);
   return head.next;
@@ -82,7 +99,7 @@ bool consume(char op)
 {
   if (token->kind != TK_RESERVED)
   {
-    error("op is not TK_RESERVED");
+    error_at(token->str, "op is not TK_RESERVED");
     return false;
   }
   if (token->str[0] != op)
@@ -98,11 +115,11 @@ void expect(char op)
 {
   if (token->kind != TK_RESERVED)
   {
-    error("expect TK_RESERVED");
+    error_at(token->str, "expect TK_RESERVED");
   }
   if (token->str[0] != op)
   {
-    error("expected:%s, but got %s.", op, token->str[0]);
+    error_at(token->str, "expected:%s, but got %s.", op, token->str[0]);
   }
   token = token->next;
 }
@@ -112,7 +129,7 @@ int expect_number()
 {
   if (token->kind != TK_NUM)
   {
-    error("expected a number");
+    error_at(token->str, "expected a number");
   }
   int val = token->val;
   token = token->next;
@@ -132,7 +149,8 @@ int main(int argc, char **argv)
     return 1;
   }
 
-  token = tokenize(argv[1]);
+  user_input = argv[1];
+  token = tokenize(user_input);
 
   // for dubug
   // while (token)
