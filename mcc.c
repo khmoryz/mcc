@@ -43,7 +43,7 @@ void error_at(char *loc, char *fmt, ...) {
 
   int pos = loc - user_input;
   fprintf(stderr, "%s\n", user_input);
-  fprintf(stderr, "%*s", pos, " ");
+  fprintf(stderr, "%*s", pos, "");  // print pos spaces.
   fprintf(stderr, "^ ");
   vfprintf(stderr, fmt, ap);
   fprintf(stderr, "\n");
@@ -83,7 +83,7 @@ Token *tokenize(char *p) {
       cur->val = strtol(p, &p, 10);
       continue;
     }
-    error_at(cur->str, "invalid token");
+    error_at(p, "invalid token");
   }
   cur = new_token(TK_EOF, cur, p);
   return head.next;
