@@ -71,7 +71,7 @@ Token *tokenize(char *p) {
       continue;
     }
     // Punctuator
-    if (strchr("+-", *p)) {
+    if (strchr("+-*/", *p)) {
       cur = new_token(TK_RESERVED, cur, p);
       p++;
       continue;
@@ -162,18 +162,33 @@ int expect_number() {
 bool at_eof() { return token->kind == TK_EOF; }
 
 Node *expr();
+Node *mul();
 Node *primary();
 
-// expr = primary ("+" primary | "-" primary)*
+// expr = mul ("+" mul | "-" mul)*
 Node *expr() {
-  Node *node = primary();
+  Node *node = mul();
   for (;;) {
     if (consume('+')) {
-      node = new_binary(ND_ADD, node, primary());
+      node = new_binary(ND_ADD, node, mul());
       continue;
     } else if (consume('-')) {
-      node = new_binary(ND_SUB, node, primary());
+      node = new_binary(ND_SUB, node, mul());
       continue;
+    } else {
+      return node;
+    }
+  }
+}
+
+// expr = primary ("*" primary | "/" primary)*
+Node *mul() {
+  Node *node = primary();
+  for (;;) {
+    if (consume('*')) {
+      node = new_binary(ND_MUL, node, primary());
+    } else if (consume('/')) {
+      node = new_binary(ND_DIV, node, primary());
     } else {
       return node;
     }
@@ -201,6 +216,13 @@ void gen(Node *node) {
       break;
     case ND_SUB:
       printf("  sub rax, rdi\n");
+      break;
+    case ND_MUL:
+      printf("  imul rax, rdi\n");
+      break;
+    case ND_DIV:
+      printf("  cqo\n");
+      printf("  idiv rdi\n");
       break;
     default:
       error("invalid node kind. kind: %s", node->kind);
