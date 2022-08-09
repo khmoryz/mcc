@@ -21,6 +21,7 @@ struct Token {
   Token *next;     // Next Token
   int val;         // If kind is TK_NUM, its value
   char *str;       // Token string
+  int len;         // Token length
 };
 
 Token *token;
@@ -51,10 +52,11 @@ void error_at(char *loc, char *fmt, ...) {
 }
 
 // Create a new token and add it as the next token of `cur`.
-Token *new_token(TokenKind kind, Token *cur, char *str) {
+Token *new_token(TokenKind kind, Token *cur, char *str, int len) {
   Token *token = calloc(1, sizeof(Token));
   token->kind = kind;
   token->str = str;
+  token->len = len;
   cur->next = token;
   return token;
 }
@@ -72,20 +74,22 @@ Token *tokenize(char *p) {
     }
     // Punctuator
     if (strchr("+-*/()", *p)) {
-      cur = new_token(TK_RESERVED, cur, p);
+      cur = new_token(TK_RESERVED, cur, p, 1);
       p++;
       continue;
     }
 
     // Integer literal
     if (isdigit(*p)) {
-      cur = new_token(TK_NUM, cur, p);
+      cur = new_token(TK_NUM, cur, p, 0);
+      char *q = p;
       cur->val = strtol(p, &p, 10);
+      cur->len = q - p;
       continue;
     }
     error_at(p, "invalid token");
   }
-  cur = new_token(TK_EOF, cur, p);
+  cur = new_token(TK_EOF, cur, p, 0);
   return head.next;
 }
 
