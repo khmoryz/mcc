@@ -181,7 +181,7 @@ Node *expr() {
   }
 }
 
-// expr = primary ("*" primary | "/" primary)*
+// mul = primary ("*" primary | "/" primary)*
 Node *mul() {
   Node *node = primary();
   for (;;) {
