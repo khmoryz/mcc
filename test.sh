@@ -25,4 +25,7 @@ assert 3 "12/4"
 assert 16 "(5+3)*2"
 assert 10 "-10+20"
 
+assert 1 "1 == 1"
+assert 0 "1 != 1"
+
 echo OK
