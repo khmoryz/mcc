@@ -71,7 +71,7 @@ Token *tokenize(char *p) {
       continue;
     }
     // Punctuator
-    if (strchr("+-*/", *p)) {
+    if (strchr("+-*/()", *p)) {
       cur = new_token(TK_RESERVED, cur, p);
       p++;
       continue;
@@ -195,8 +195,15 @@ Node *mul() {
   }
 }
 
-// primary = num
-Node *primary() { return new_num(expect_number()); }
+// primary = "(" expr ")" | num
+Node *primary() {
+  if (consume('(')) {
+    Node *node = expr();
+    expect(')');
+    return node;
+  }
+  return new_num(expect_number());
+}
 
 // Code Generator
 void gen(Node *node) {
