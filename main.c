@@ -11,13 +11,14 @@ int main(int argc, char **argv) {
 
   // for dubug
   // while (token) {
+  //   printf("-----\n");
   //   printf("Kind:%d\n", token->kind);
   //   printf("Str:%s\n", token->str);
   //   printf("Len:%d\n", token->len);
   //   token = token->next;
   // }
 
-  Node *node = expr();
+  Node *node = program();
 
   // for dubug
   // while (node) {
@@ -25,15 +26,8 @@ int main(int argc, char **argv) {
   //   node = node->lhs;
   // }
 
-  printf(".intel_syntax noprefix\n");
-  printf(".globl main\n");
-  printf("main:\n");
   // Traverse the AST to emit assembly.
-  gen(node);
+  codegen(node);
 
-  // A result must be at the top of the stack, so pop it
-  // to RAX to make it a program exit code.
-  printf("  pop rax\n");
-  printf("  ret\n");
   return 0;
 }

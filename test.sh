@@ -16,21 +16,23 @@ assert() {
   fi
 }
 
-assert 0 0
-assert 42 42
-assert 21 "5+20-4"
-assert 21 " 5 + 20 - 4 "
-assert 12 "4*3"
-assert 3 "12/4"
-assert 16 "(5+3)*2"
-assert 10 "-10+20"
+assert 0 "0;"
+assert 42 "42;"
+assert 21 "5+20-4;"
+assert 21 " 5 + 20 - 4 ;"
+assert 12 "4*3;"
+assert 3 "12/4;"
+assert 16 "(5+3)*2;"
+assert 10 "-10+20;"
 
-assert 1 "1 == 1"
-assert 0 "1 != 1"
-assert 1 "1 < 2"
-assert 0 "1 > 2"
-assert 1 "1 <= 1"
-assert 1 "1 >= 1"
-assert 0 "1 <= -1"
+assert 1 "1 == 1;"
+assert 0 "1 != 1;"
+assert 1 "1 < 2;"
+assert 0 "1 > 2;"
+assert 1 "1 <= 1;"
+assert 1 "1 >= 1;"
+assert 0 "1 <= -1;"
+
+assert 16 "1+1;(5+3)*2;"
 
 echo OK

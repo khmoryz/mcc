@@ -1,6 +1,5 @@
 #include "mcc.h"
 
-// Code Generator
 void gen(Node *node) {
   if (node->kind == ND_NUM) {
     printf("  push %d\n", node->val);
@@ -51,4 +50,15 @@ void gen(Node *node) {
       break;
   }
   printf("  push rax\n");
+}
+
+void codegen(Node *node) {
+  printf(".intel_syntax noprefix\n");
+  printf(".globl main\n");
+  printf("main:\n");
+  for (Node *n = node; n; n = n->next) {
+    gen(n);
+    printf("  pop rax\n");
+  }
+  printf("  ret\n");
 }
