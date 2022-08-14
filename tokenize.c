@@ -26,6 +26,15 @@ void error_at(char *loc, char *fmt, ...) {
   exit(1);
 }
 
+Token *consume_ident() {
+  if (token->kind != TK_IDENT) {
+    return NULL;
+  }
+  Token *t = token;
+  token = token->next;
+  return t;
+}
+
 // Create a new token and add it as the next token of `cur`.
 Token *new_token(TokenKind kind, Token *cur, char *str, int len) {
   Token *token = calloc(1, sizeof(Token));
@@ -57,7 +66,7 @@ Token *tokenize(char *p) {
       continue;
     }
     // Single-Letter punctuator
-    if (strchr("+-*/()<>;", *p)) {
+    if (strchr("+-*/()<>;=", *p)) {
       cur = new_token(TK_RESERVED, cur, p, 1);
       p++;
       continue;
@@ -71,6 +80,13 @@ Token *tokenize(char *p) {
       cur->len = q - p;
       continue;
     }
+
+    // Identifier
+    if ('a' <= *p && *p <= 'z') {
+      cur = new_token(TK_IDENT, cur, p++, 1);
+      continue;
+    }
+
     error_at(p, "invalid token");
   }
   cur = new_token(TK_EOF, cur, p, 0);
