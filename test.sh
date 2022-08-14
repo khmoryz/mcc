@@ -36,5 +36,6 @@ assert 0 "1 <= -1;"
 assert 16 "1+1;(5+3)*2;"
 
 assert 3 "a=3;"
+assert 7 "a=5*2-3;"
 
 echo OK
