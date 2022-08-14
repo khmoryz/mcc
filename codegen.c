@@ -94,7 +94,7 @@ void codegen(Node *node) {
   printf("main:\n");
 
   // Prologue
-  // ensure for 28 identifier
+  // ensure for 26 identifier
   printf("  push rbp\n");
   printf("  mov rbp, rsp\n");
   printf("  sub rsp, 208\n");
