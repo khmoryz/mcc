@@ -37,5 +37,7 @@ assert 16 "1+1;(5+3)*2;"
 
 assert 3 "a=3;"
 assert 7 "a=5*2-3;"
+assert 5 "return 5;"
+assert 12 "a=3; z=4; return a*z;"
 
 echo OK
