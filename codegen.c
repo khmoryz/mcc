@@ -29,6 +29,10 @@ void gen(Node *node) {
     case ND_NUM:
       printf("  push %d\n", node->val);
       return;
+    case ND_EXPR_STMT:
+      gen(node->lhs);
+      printf("  add rsp, 8\n");
+      return;
     case ND_VAR:
       gen_addr(node);
       load();
@@ -41,9 +45,7 @@ void gen(Node *node) {
     case ND_RETURN:
       gen(node->lhs);
       printf("  pop rax\n");
-      printf("  mov rsp, rbp\n");
-      printf("  pop rbp\n");
-      printf("  ret\n");
+      printf("  jmp .Lreturn\n");
       return;
   }
 
@@ -96,7 +98,7 @@ void gen(Node *node) {
 
 void codegen(Program *prog) {
   printf(".intel_syntax noprefix\n");
-  printf(".globl main\n");
+  printf(".global main\n");
   printf("main:\n");
 
   // Prologue
@@ -106,12 +108,11 @@ void codegen(Program *prog) {
   printf("  sub rsp, %d\n", prog->stack_size);
 
   // Emit code
-  for (Node *node = prog->node; node; node = node->next) {
+  for (Node *node = prog->node; node; node = node->next)
     gen(node);
-    printf("  pop rax\n");
-  }
 
   // Epilogue
+  printf(".Lreturn:\n");
   printf("  mov rsp, rbp\n");
   printf("  pop rbp\n");
   printf("  ret\n");

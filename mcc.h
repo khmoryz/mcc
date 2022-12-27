@@ -53,18 +53,19 @@ struct Var {
 
 // AST node
 typedef enum {
-  ND_ADD,     // +
-  ND_SUB,     // -
-  ND_MUL,     // *
-  ND_DIV,     // /
-  ND_EQ,      // ==
-  ND_NE,      // !=
-  ND_LT,      // <
-  ND_LE,      // <=
-  ND_ASSIGN,  // =
-  ND_RETURN,  // "return"
-  ND_VAR,    // Variable
-  ND_NUM,     // Integer
+  ND_ADD,        // +
+  ND_SUB,        // -
+  ND_MUL,        // *
+  ND_DIV,        // /
+  ND_EQ,         // ==
+  ND_NE,         // !=
+  ND_LT,         // <
+  ND_LE,         // <=
+  ND_ASSIGN,     // =
+  ND_RETURN,     // "return"
+  ND_EXPR_STMT,  // Expression statement
+  ND_VAR,        // Variable
+  ND_NUM,        // Integer
 } NodeKind;
 
 // AST node type
