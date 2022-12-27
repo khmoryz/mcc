@@ -40,4 +40,6 @@ assert 7 "a=5*2-3;"
 assert 5 "return 5;"
 assert 12 "a=3; z=4; return a*z;"
 
+assert 6 "foo = 1; bar = 2 + 3; return foo + bar;"
+assert 12 "foo1 = 3; BAR = 4; return foo1 * BAR;"
 echo OK

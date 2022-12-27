@@ -26,6 +26,13 @@ void error_at(char *loc, char *fmt, ...) {
   exit(1);
 }
 
+char *strndup(char *p, int len) {
+  char *buf = malloc(len + 1);
+  strncpy(buf, p, len);
+  buf[len] = '\0';
+  return buf;
+}
+
 Token *consume_ident() {
   if (token->kind != TK_IDENT) {
     return NULL;
@@ -96,8 +103,11 @@ Token *tokenize(char *p) {
     }
 
     // Identifier
-    if ('a' <= *p && *p <= 'z') {
-      cur = new_token(TK_IDENT, cur, p++, 1);
+    if (is_alpha(*p)) {
+      char *q = p++;
+      while (is_alnum(*p))
+        p++;
+      cur = new_token(TK_IDENT, cur, q, p - q);
       continue;
     }
 

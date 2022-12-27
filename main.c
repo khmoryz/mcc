@@ -18,7 +18,15 @@ int main(int argc, char **argv) {
   //   token = token->next;
   // }
 
-  Node *node = program();
+  Program *prog = program();
+
+  // Assign offsets to local variables.
+  int offset = 0;
+  for(Var *var = prog->locals; var; var = var->next) {
+    offset += 8;
+    var->offset = offset;
+  }
+  prog->stack_size = offset;
 
   // for dubug
   // while (node) {
@@ -27,7 +35,7 @@ int main(int argc, char **argv) {
   // }
 
   // Traverse the AST to emit assembly.
-  codegen(node);
+  codegen(prog);
 
   return 0;
 }
