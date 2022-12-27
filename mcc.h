@@ -74,7 +74,7 @@ struct Node {
   Node *next;     // Next node
   Node *lhs;      // Left-hand side
   Node *rhs;      // Right-hand side
-  Var *var;       // Used if kind == ND_VAR
+  Var *var;       // Used if kind == ND_VAR (not necessary??)
   int val;        // Used if kind == ND_NUM
 };
 
