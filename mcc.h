@@ -30,6 +30,7 @@ void error(char *fmt, ...);
 void error_at(char *loc, char *fmt, ...);
 
 char *strndup(char *p, int len);
+
 Token *consume_ident();
 Token *tokenize();
 
