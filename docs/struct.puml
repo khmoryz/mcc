@@ -1,0 +1,53 @@
+@startuml
+
+object TokenKind {
+  TK_RESERVED
+  TK_IDENT
+  TK_NUM
+  TK_EO
+}
+
+map Token {
+  TokenKind[~*kind] *-> TokenKind
+  Token[~*token] *-> Token
+  int => val
+  char => ~*str
+  int => len
+}
+
+map Var {
+  Var[~*next] *-> Var
+  char => ~*name
+  int => offset
+}
+
+object NodeKind {
+  ND_ADD
+  ND_SUB
+  ND_MUL
+  ND_DIV
+  ND_EQ
+  ND_NE
+  ND_LT
+  ND_LE
+  ND_ASSIGN
+  ND_RETURN
+  ND_VAR
+  ND_NUM
+}
+
+map Node {
+  NodeKind *-> NodeKind
+  Node[~*next] *-> Node
+  Node[~*lhs] *-> Node
+  Node[~*rhs] *-> Node
+  Var[~*var 不要かも] *-> Var
+  int => val
+}
+
+map Program {
+  Node[~*node] *-> Node
+  Var[~*locals] *-> Var
+  int => stack_size
+}
+@enduml
