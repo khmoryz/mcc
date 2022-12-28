@@ -94,6 +94,8 @@ struct Node {
 
   // Function call
   char *funcname;
+  Node *args;
+
 
   Var *var;       // Used if kind == ND_VAR (not necessary??)
   int val;        // Used if kind == ND_NUM

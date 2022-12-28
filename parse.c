@@ -274,7 +274,22 @@ Node *unary() {
   return primary();
 }
 
-// primary = "(" expr ")" | ident args? | num
+// func-args = "(" (assign ("," assign)*)? ")"
+Node *func_args() {
+  if (consume(")"))
+    return NULL;
+
+    Node *head = assign();
+    Node *cur = head;
+    while (consume(",")) {
+      cur->next = assign();
+      cur = cur->next;
+    }
+    expect(")");
+    return head;
+}
+
+// primary = "(" expr ")" | ident func-args? | num
 // args = "(" ")"
 Node *primary() {
   if (consume("(")) {
@@ -286,9 +301,9 @@ Node *primary() {
   Token *tok = consume_ident();
   if(tok) {
     if (consume("(")) {
-      expect(")");
       Node *node = new_node(ND_FUNCALL);
       node->funcname = strndup(tok->str, tok->len);
+      node->args = func_args();
       return node;
     }
 
