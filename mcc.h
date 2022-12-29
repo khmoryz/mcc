@@ -32,6 +32,7 @@ void error_at(char *loc, char *fmt, ...);
 char *strndup(char *p, int len);
 
 Token *consume_ident();
+char *expect_ident();
 Token *tokenize();
 
 extern Token *token;
@@ -101,16 +102,19 @@ struct Node {
   int val;        // Used if kind == ND_NUM
 };
 
-typedef struct {
+typedef struct Function Function;
+struct Function {
+  Function *next;
+  char *name;
   Node *node;
   Var *locals;
   int stack_size;
-} Program;
+};
 
-Program *program();
+Function *program();
 
 //
 // codegen.c
 //
 
-void codegen(Program *node);
+void codegen(Function *prog);

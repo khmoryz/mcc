@@ -42,6 +42,14 @@ Token *consume_ident() {
   return t;
 }
 
+char *expect_ident() {
+  if (token->kind != TK_IDENT)
+    error_at(token->str, "expedted an identifier");
+  char *s = strndup(token->str, token->len);
+  token = token->next;
+  return s;
+}
+
 // Create a new token and add it as the next token of `cur`.
 Token *new_token(TokenKind kind, Token *cur, char *str, int len) {
   Token *token = calloc(1, sizeof(Token));
