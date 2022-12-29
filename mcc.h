@@ -28,11 +28,15 @@ struct Token {
 
 void error(char *fmt, ...);
 void error_at(char *loc, char *fmt, ...);
-
+void error_tok(Token *tok, char *fmt, ...);
+Token *consume(char *op);
 char *strndup(char *p, int len);
-
 Token *consume_ident();
+void expect(char *op);
+int expect_number();
 char *expect_ident();
+bool at_eof();
+Token *new_token(TokenKind kind, Token *cur, char *str, int len);
 Token *tokenize();
 
 extern Token *token;
@@ -83,6 +87,7 @@ typedef struct Node Node;
 struct Node {
   NodeKind kind;  // Node kind
   Node *next;     // Next node
+  Token *tok;     // Representative token
 
   Node *lhs;      // Left-hand side
   Node *rhs;      // Right-hand side

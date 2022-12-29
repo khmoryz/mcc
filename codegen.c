@@ -12,7 +12,7 @@ void gen_addr(Node *node) {
     printf("  push rax\n");
     return;
   }
-  
+  error_tok(node->tok, "node an lvalue");
 }
 
 void load() {
