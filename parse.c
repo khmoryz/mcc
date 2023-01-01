@@ -318,14 +318,17 @@ Node *mul() {
   }
 }
 
-// unary = ("+" | "-")? primary
+// unary = ("+" | "-" | "*" | "&")? unary
 Node *unary() {
   Token *tok;
-  if (consume("+")) {
-    return primary();
-  } else if (tok = consume("-")) {
-    return new_binary(ND_SUB, new_num(0, tok), primary(), tok);
-  }
+  if (consume("+"))
+    return unary();
+  if (tok = consume("-"))
+    return new_binary(ND_SUB, new_num(0, tok), unary(), tok);
+  if (tok = consume("&"))
+    return new_unary(ND_ADDR, unary(), tok);
+  if (tok = consume("*"))
+    return new_unary(ND_DEREF, unary(), tok);
   return primary();
 }
 
