@@ -2,6 +2,7 @@
 
 VarList *locals;
 
+// Find a local variable by name.
 Var *find_var(Token *tok) {
   for (VarList *vl = locals; vl; vl = vl->next) {
     Var *var = vl->var;
@@ -25,9 +26,9 @@ Node *new_binary(NodeKind kind, Node *lhs, Node *rhs, Token *tok) {
   return node;
 }
 
-Node *new_unary(NodeKind kind, Node *lhs, Token *tok) {
+Node *new_unary(NodeKind kind, Node *expr, Token *tok) {
   Node *node = new_node(kind, tok);
-  node->lhs = lhs;
+  node->lhs = expr;
   return node;
 }
 
@@ -55,18 +56,6 @@ Var *push_var(char *name, Type *ty) {
   return var;
 }
 
-// Ensure that the current token is TK_NUM.
-int expect_number() {
-  if (token->kind != TK_NUM) {
-    error_at(token->str, "expected a number");
-  }
-  int val = token->val;
-  token = token->next;
-  return val;
-}
-
-bool at_eof() { return token->kind == TK_EOF; }
-
 Function *function();
 Node *declaration();
 Node *stmt();
@@ -92,6 +81,7 @@ Function *program() {
   return head.next;
 }
 
+
 // basetype = "int" "*"*
 Type *basetype() {
   expect("int");
@@ -101,17 +91,29 @@ Type *basetype() {
   return ty;
 }
 
+Type *read_type_suffix(Type *base) {
+  if (!consume("["))
+    return base;
+  int sz = expect_number();
+  expect("]");
+  base = read_type_suffix(base);
+  return array_of(base, sz);
+}
+
 VarList *read_func_param() {
-  VarList *vl = calloc(1, sizeof(VarList));
   Type *ty = basetype();
-  vl->var = push_var(expect_ident(), ty);
+  char *name = expect_ident();
+  ty = read_type_suffix(ty);
+
+  VarList *vl = calloc(1, sizeof(VarList));
+  vl->var = push_var(name, ty);
   return vl;
 }
 
 VarList *read_func_params() {
   if (consume(")"))
     return NULL;
-  
+
   VarList *head = read_func_param();
   VarList *cur = head;
 
@@ -120,6 +122,7 @@ VarList *read_func_params() {
     cur->next = read_func_param();
     cur = cur->next;
   }
+
   return head;
 }
 
@@ -149,25 +152,28 @@ Function *function() {
   return fn;
 }
 
-Node *read_expr_stmt() {
-  Token *tok = token;
-  return new_unary(ND_EXPR_STMT, expr(), tok);
-}
-
+// declaration = basetype ident ("[" num "]")* ("=" expr) ";"
 Node *declaration() {
   Token *tok = token;
   Type *ty = basetype();
-  Var *var = push_var(expect_ident(), ty);
+  char *name = expect_ident();
+  ty = read_type_suffix(ty);
+  Var *var = push_var(name, ty);
 
   if (consume(";"))
     return new_node(ND_NULL, tok);
-  
+
   expect("=");
   Node *lhs = new_var(var, tok);
   Node *rhs = expr();
   expect(";");
   Node *node = new_binary(ND_ASSIGN, lhs, rhs, tok);
   return new_unary(ND_EXPR_STMT, node, tok);
+}
+
+Node *read_expr_stmt() {
+  Token *tok = token;
+  return new_unary(ND_EXPR_STMT, expr(), tok);
 }
 
 // stmt = "return" expr ";"
@@ -183,7 +189,7 @@ Node *stmt() {
     Node *node = new_unary(ND_RETURN, expr(), tok);
     expect(";");
     return node;
-  };
+  }
 
   if (tok = consume("if")) {
     Node *node = new_node(ND_IF, tok);
@@ -223,12 +229,13 @@ Node *stmt() {
     node->then = stmt();
     return node;
   }
+
   if (tok = consume("{")) {
     Node head;
     head.next = NULL;
     Node *cur = &head;
 
-  while (!consume("}")) {
+    while (!consume("}")) {
       cur->next = stmt();
       cur = cur->next;
     }
@@ -238,6 +245,7 @@ Node *stmt() {
     return node;
   }
 
+
   if (tok = peek("int"))
     return declaration();
 
@@ -246,17 +254,17 @@ Node *stmt() {
   return node;
 }
 
-
 // expr = assign
-Node *expr() { return assign(); }
+Node *expr() {
+  return assign();
+}
 
 // assign = equality ("=" assign)?
 Node *assign() {
   Node *node = equality();
   Token *tok;
-  if (tok = consume("=")) {
+  if (tok = consume("="))
     node = new_binary(ND_ASSIGN, node, assign(), tok);
-  }
   return node;
 }
 
@@ -266,15 +274,12 @@ Node *equality() {
   Token *tok;
 
   for (;;) {
-    if (tok = consume("==")) {
+    if (tok = consume("=="))
       node = new_binary(ND_EQ, node, relational(), tok);
-      continue;
-    } else if (tok = consume("!=")) {
+    else if (tok = consume("!="))
       node = new_binary(ND_NE, node, relational(), tok);
-      continue;
-    } else {
+    else
       return node;
-    }
   }
 }
 
@@ -284,17 +289,16 @@ Node *relational() {
   Token *tok;
 
   for (;;) {
-    if (tok = consume("<")) {
+    if (tok = consume("<"))
       node = new_binary(ND_LT, node, add(), tok);
-    } else if (tok = consume("<=")) {
+    else if (tok = consume("<="))
       node = new_binary(ND_LE, node, add(), tok);
-    } else if (tok = consume(">")) {
+    else if (tok = consume(">"))
       node = new_binary(ND_LT, add(), node, tok);
-    } else if (tok = consume(">=")) {
+    else if (tok = consume(">="))
       node = new_binary(ND_LE, add(), node, tok);
-    } else {
+    else
       return node;
-    }
   }
 }
 
@@ -304,15 +308,12 @@ Node *add() {
   Token *tok;
 
   for (;;) {
-    if (tok = consume("+")) {
+    if (tok = consume("+"))
       node = new_binary(ND_ADD, node, mul(), tok);
-      continue;
-    } else if (tok = consume("-")) {
+    else if (tok = consume("-"))
       node = new_binary(ND_SUB, node, mul(), tok);
-      continue;
-    } else {
+    else
       return node;
-    }
   }
 }
 
@@ -320,18 +321,19 @@ Node *add() {
 Node *mul() {
   Node *node = unary();
   Token *tok;
+
   for (;;) {
-    if (tok = consume("*")) {
+    if (tok = consume("*"))
       node = new_binary(ND_MUL, node, unary(), tok);
-    } else if (tok = consume("/")) {
+    else if (tok = consume("/"))
       node = new_binary(ND_DIV, node, unary(), tok);
-    } else {
+    else
       return node;
-    }
   }
 }
 
 // unary = ("+" | "-" | "*" | "&")? unary
+//       | primary
 Node *unary() {
   Token *tok;
   if (consume("+"))
@@ -350,18 +352,17 @@ Node *func_args() {
   if (consume(")"))
     return NULL;
 
-    Node *head = assign();
-    Node *cur = head;
-    while (consume(",")) {
-      cur->next = assign();
-      cur = cur->next;
-    }
-    expect(")");
-    return head;
+  Node *head = assign();
+  Node *cur = head;
+  while (consume(",")) {
+    cur->next = assign();
+    cur = cur->next;
+  }
+  expect(")");
+  return head;
 }
 
 // primary = "(" expr ")" | ident func-args? | num
-// args = "(" ")"
 Node *primary() {
   if (consume("(")) {
     Node *node = expr();
@@ -370,7 +371,7 @@ Node *primary() {
   }
 
   Token *tok;
-  if(tok = consume_ident()) {
+  if (tok = consume_ident()) {
     if (consume("(")) {
       Node *node = new_node(ND_FUNCALL, tok);
       node->funcname = strndup(tok->str, tok->len);
@@ -379,8 +380,8 @@ Node *primary() {
     }
 
     Var *var = find_var(tok);
-    if(!var)
-      error_tok(tok, "undifined variable");
+    if (!var)
+      error_tok(tok, "undefined variable");
     return new_var(var, tok);
   }
 
